@@ -59,7 +59,6 @@ namespace Game_Radionova
 
         private void InitUI()
         {
-            // Главное расположение: 2 строки — панель и поле
             var mainLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -70,11 +69,10 @@ namespace Game_Radionova
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60));
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-            // Верхняя панель в ретро-стиле
             topPanel = new Panel
             {
                 Dock = DockStyle.Fill,
-                BackColor = Color.FromArgb(64, 64, 64) // тёмно-серый, как старые окна
+                BackColor = Color.FromArgb(64, 64, 64)
             };
 
             currentPlayerLabel = new Label
