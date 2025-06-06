@@ -1,7 +1,7 @@
 # Game_Radionova
 
 ## Диаграмма классов
-![Диаграмма классов](docs/diagram.svg)
+![Диаграмма классов](diagram.svg)
 
 ---
 
