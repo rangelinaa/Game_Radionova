@@ -1,7 +1,7 @@
 # Game_Radionova
 
 ## Диаграмма классов
-![Диаграмма классов](https://www.mermaidchart.com/play#pako:eNp9VE1vGjEQ_SsWp60SDvSYQw-QBiElCgKqXiJFxh7IKN4xsmeb0ij89hrvBrxeNntZ-703X56x3wfKahjcDJSR3t-i3DpZPpEIn0YHitGSWI2fqMaiSixZOr6zrhTvNXz8rk5o8e2MDtcVs6XR88Sgem0xTmq040gvkbYG5kbuwT1PXkC9gp68SNqC7jNZvdkv9R_tlKeyhDzj4RFcAnOI7oVvFhn_k7ZIICD-Em6OiisHY_tXbNB5jvWBvqzwoCzprmSFJTjh4A9IE9fpwVlrBPqHyjDuYqUJicRCVc4B8Tzn7uUaTJuNUGbulXXNkY_6qe8dx5HMHdaFbMN55WUc98udJAFG7jzo4z6l5doEb3tb8VxScM8ZMOokwMFDHr-xtbu4-Gx9HMvPzhdpt9OhmhHyr1mRQ9EOwegOg9Lgv7rQDrc497LFPVIzDvU98EAa3LWAVBMH-TfSFyN8mtb04nl2ARO3uNmgCuOyT7g4RbPLU3SVeiz0yfy6PXb92TR3I83lOD4L--YzaGJNVVKK3qPnQ535QczC9Ugv3kKStqVw8dfpZh22t5-ramfgEKKGOogPYgo8daiXoWdFHTBVt_KYAoGTDDGfIljntZ-ekeHwR7shN6Ly4HtUzUGlmvMbesGVchCy6FXGTaZKwlxwGJQ6CAcf_wFT8NwK)
+![Диаграмма классов](docs/diagram.svg)
 
 ---
 
@@ -12,7 +12,7 @@
 
 **Основные методы:**
 - `button1_Click` — создаёт настройки игры и запускает GameForm.
-- `radioButtonSinglePlayer_CheckedChanged, radioButtonTwoPlayer_CheckedChanged` — обработчики переключения режимов (пока не реализованы).
+- `radioButtonSinglePlayer_CheckedChanged, radioButtonTwoPlayer_CheckedChanged` — обработчики переключения режимов.
 
 **Зависимости:** создает экземпляры GameSettings и GameForm.
 
