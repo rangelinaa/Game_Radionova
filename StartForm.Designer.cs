@@ -93,7 +93,6 @@
             this.radioButtonSinglePlayer.TabStop = true;
             this.radioButtonSinglePlayer.Text = "1 игрок";
             this.radioButtonSinglePlayer.UseVisualStyleBackColor = true;
-            this.radioButtonSinglePlayer.CheckedChanged += new System.EventHandler(this.radioButtonSinglePlayer_CheckedChanged);
             // 
             // radioButtonTwoPlayer
             // 
@@ -104,7 +103,7 @@
             this.radioButtonTwoPlayer.TabIndex = 5;
             this.radioButtonTwoPlayer.Text = "2 игрока";
             this.radioButtonTwoPlayer.UseVisualStyleBackColor = true;
-            this.radioButtonTwoPlayer.CheckedChanged += new System.EventHandler(this.radioButtonTwoPlayer_CheckedChanged);
+            
             // 
             // StartForm
             // 

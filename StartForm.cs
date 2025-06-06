@@ -28,15 +28,5 @@ namespace Game_Radionova
             gameForm.Show();
             Hide();
         }
-
-        private void radioButtonSinglePlayer_CheckedChanged(object sender, EventArgs e)
-        {
-            
-        }
-
-        private void radioButtonTwoPlayer_CheckedChanged(object sender, EventArgs e)
-        {
-            
-        }
     }
 }
