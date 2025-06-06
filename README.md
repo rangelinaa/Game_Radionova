@@ -12,7 +12,6 @@
 
 **Основные методы:**
 - `button1_Click` — создаёт настройки игры и запускает GameForm.
-- `radioButtonSinglePlayer_CheckedChanged, radioButtonTwoPlayer_CheckedChanged` — обработчики переключения режимов.
 
 **Зависимости:** создает экземпляры GameSettings и GameForm.
 
