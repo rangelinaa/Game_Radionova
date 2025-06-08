@@ -52,8 +52,17 @@
     <Compile Include="GameForm.Designer.cs">
       <DependentUpon>GameForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Logic\BackgroundMusicPlayer.cs" />
+    <Compile Include="Logic\Card.cs" />
+    <Compile Include="Logic\CountdownTimer.cs" />
+    <Compile Include="Logic\Game.cs" />
+    <Compile Include="Logic\GameBoardRenderer.cs" />
+    <Compile Include="Logic\GameController.cs" />
     <Compile Include="Logic\GameEngine.cs" />
+    <Compile Include="Logic\GameResultDisplayer.cs" />
     <Compile Include="Logic\GameSettings.cs" />
+    <Compile Include="Logic\Player.cs" />
+    <Compile Include="Logic\TileView.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StartForm.cs">

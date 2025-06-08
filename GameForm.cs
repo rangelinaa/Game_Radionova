@@ -1,60 +1,59 @@
-﻿using System;
+﻿using Game_Radionova.Logic;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using Game_Radionova.Logic;
 using System.Media;
 
 namespace Game_Radionova
 {
     public partial class GameForm : Form
     {
-        private SoundPlayer backgroundMusic;
-
         private GameSettings settings;
         private GameEngine engine;
+        private Game game;
+        private GameController controller;
 
-        private PictureBox firstClicked = null;
-        private PictureBox secondClicked = null;
-        private Timer revealTimer;
+        private List<TileView> tileViews;
 
-        private bool isMultiplayer;
-        private int currentPlayer = 1;
-        private Label currentPlayerLabel;
+        private CountdownTimer countdownTimer;
+        private BackgroundMusicPlayer musicPlayer;
 
-        private int scorePlayer1 = 0;
-        private int scorePlayer2 = 0;
-        private Label scoreLabel;
+        private Player player1;
+        private Player player2;
 
-        private Timer gameTimer;
-        private TimeSpan elapsedTime;
-        private TimeSpan maxTime = TimeSpan.FromMinutes(2);
-
-        private TableLayoutPanel tableLayoutPanel1;
+        private TableLayoutPanel gamePanel;
         private Label timeLabel;
+        private Label scoreLabel;
+        private Label currentPlayerLabel;
         private Panel topPanel;
+
+        private Timer revealTimer;
+        private TileView firstTile, secondTile;
+
+        private bool isMultiplayer => settings.IsMultiplayer;
 
         public GameForm(GameSettings settings)
         {
             InitializeComponent();
-
-            backgroundMusic = new SoundPlayer("Resources/retro_theme.wav");
-            backgroundMusic.PlayLooping();
-
-
             this.settings = settings;
-            this.isMultiplayer = settings.IsMultiplayer;
 
             engine = new GameEngine(settings);
+            var cards = engine.GenerateCards();
+            player1 = new Player("Игрок 1");
+            player2 = isMultiplayer ? new Player("Игрок 2") : null;
 
-            InitRevealTimer();
+            game = new Game(cards, isMultiplayer ? new List<Player> { player1, player2 } : new List<Player> { player1 });
+            controller = new GameController(game);
+
+            controller.OnMatchChecked += HandleMatchChecked;
+            controller.OnTurnChanged += player => UpdatePlayerLabel();
+            controller.OnGameFinished += ShowGameResult;
+
             InitUI();
-            InitGameField();
-
-            if (!isMultiplayer)
-                InitializeTimer();
+            StartGame();
         }
 
         private void InitUI()
@@ -66,6 +65,7 @@ namespace Game_Radionova
                 ColumnCount = 1,
                 BackColor = Color.DarkSlateGray
             };
+
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60));
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
@@ -90,7 +90,7 @@ namespace Game_Radionova
                 scoreLabel = new Label
                 {
                     Text = "Очки: 0 - 0",
-                    Font = new Font("Courier New", 10, FontStyle.Regular),
+                    Font = new Font("Courier New", 10),
                     ForeColor = Color.LightCyan,
                     AutoSize = true,
                     Location = new Point(10, 35)
@@ -104,136 +104,27 @@ namespace Game_Radionova
                     Font = new Font("Courier New", 12, FontStyle.Bold),
                     ForeColor = Color.Lime,
                     AutoSize = true,
-                    Location = new Point(ClientSize.Width - 180, 15),
-                    Anchor = AnchorStyles.Top | AnchorStyles.Right
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                    Text = "Время: 00:00",
+                    Location = new Point(10, 10)
                 };
                 topPanel.Controls.Add(timeLabel);
             }
 
-            tableLayoutPanel1 = new TableLayoutPanel
-            {
-                RowCount = engine.Rows,
-                ColumnCount = engine.Columns,
-                Dock = DockStyle.Fill,
-                BackColor = Color.FromArgb(0, 0, 64),
-                CellBorderStyle = TableLayoutPanelCellBorderStyle.Single
-            };
+            gamePanel = GameBoardRenderer.Render(game, engine.Rows, engine.Columns, OnTileClicked, out tileViews);
 
             mainLayout.Controls.Add(topPanel, 0, 0);
-            mainLayout.Controls.Add(tableLayoutPanel1, 0, 1);
+            mainLayout.Controls.Add(gamePanel, 0, 1);
             Controls.Add(mainLayout);
         }
 
-        private void InitializeTimer()
+        private void StartGame()
         {
-            elapsedTime = TimeSpan.Zero;
-            gameTimer = new Timer { Interval = 1000 };
-            gameTimer.Tick += GameTimer_Tick;
-            gameTimer.Start();
+            InitRevealTimer();
+            InitMusic();
 
-            timeLabel = new Label
-            {
-                Font = new Font("Courier New", 12, FontStyle.Bold),
-                ForeColor = Color.Lime,
-                AutoSize = true,
-                Anchor = AnchorStyles.Right,
-                Location = new Point(this.ClientSize.Width - 180, 15)
-            };
-
-            topPanel.Controls.Add(timeLabel);
-        }
-
-        private void GameTimer_Tick(object sender, EventArgs e)
-        {
-            elapsedTime = elapsedTime.Add(TimeSpan.FromSeconds(1));
-            TimeSpan remainingTime = maxTime - elapsedTime;
-
-            if (remainingTime.TotalSeconds <= 0)
-            {
-                timeLabel.Text = "Время вышло!";
-                gameTimer.Stop();
-                MessageBox.Show("Время вышло! Попробуй ещё раз.", "Проигрыш");
-                backgroundMusic?.Stop();
-
-                Close();
-            }
-            else
-            {
-                timeLabel.Text = $"Время: {remainingTime.Minutes:D2}:{remainingTime.Seconds:D2}";
-                timeLabel.Font = remainingTime.TotalSeconds <= 10 ? new Font("Courier New", 16, FontStyle.Bold) : new Font("Courier New", 12, FontStyle.Bold);
-                timeLabel.ForeColor = remainingTime.TotalSeconds <= 10 ? Color.Red : Color.Lime;
-            }
-        }
-
-        private void InitGameField()
-        {
-            for (int i = 0; i < engine.Rows; i++)
-                tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / engine.Rows));
-
-            for (int j = 0; j < engine.Columns; j++)
-                tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / engine.Columns));
-
-            foreach (var iconPath in engine.Icons)
-            {
-                PictureBox pb = new PictureBox
-                {
-                    Dock = DockStyle.Fill,
-                    BackColor = Color.Black,
-                    BorderStyle = BorderStyle.Fixed3D,
-                    SizeMode = PictureBoxSizeMode.StretchImage,
-                    Tag = iconPath,
-                    Image = null,
-                    Margin = new Padding(2)
-                };
-
-                pb.Click += OnPictureClick;
-                tableLayoutPanel1.Controls.Add(pb);
-            }
-        }
-
-        private void OnPictureClick(object sender, EventArgs e)
-        {
-            if (revealTimer.Enabled) return;
-
-            var clicked = sender as PictureBox;
-            if (clicked == null || clicked.Image != null) return;
-
-            clicked.Image = Image.FromFile(clicked.Tag.ToString());
-
-            if (firstClicked == null)
-            {
-                firstClicked = clicked;
-                return;
-            }
-
-            secondClicked = clicked;
-
-            if (firstClicked.Tag.ToString() == secondClicked.Tag.ToString())
-            {
-                firstClicked = secondClicked = null;
-
-                if (isMultiplayer)
-                {
-                    if (currentPlayer == 1)
-                        scorePlayer1++;
-                    else
-                        scorePlayer2++;
-
-                    scoreLabel.Text = $"Очки: {scorePlayer1} - {scorePlayer2}";
-                }
-
-                CheckWin();
-            }
-            else
-            {
-                revealTimer.Start();
-
-                if (isMultiplayer)
-                {
-                    currentPlayer = currentPlayer == 1 ? 2 : 1;
-                    currentPlayerLabel.Text = $"Ход игрока {currentPlayer}";
-                }
-            }
+            if (!isMultiplayer)
+                InitTimer();
         }
 
         private void InitRevealTimer()
@@ -242,36 +133,117 @@ namespace Game_Radionova
             revealTimer.Tick += (s, e) =>
             {
                 revealTimer.Stop();
-                firstClicked.Image = null;
-                secondClicked.Image = null;
-                firstClicked = secondClicked = null;
+
+                if (firstTile != null && !firstTile.Card.IsMatched)
+                    firstTile.Hide();
+                if (secondTile != null && !secondTile.Card.IsMatched)
+                    secondTile.Hide();
+
+                controller.ResetTurn();
+                ResetSelection();
             };
         }
 
-        private void CheckWin()
+        private void InitTimer()
         {
-            foreach (Control control in tableLayoutPanel1.Controls)
+            countdownTimer = new CountdownTimer(TimeSpan.FromMinutes(2));
+            countdownTimer.TimeUpdated += remaining =>
             {
-                if (control is PictureBox pb && pb.Image == null)
-                    return;
+                timeLabel.Text = $"Время: {remaining.Minutes:D2}:{remaining.Seconds:D2}";
+                timeLabel.Font = remaining.TotalSeconds <= 10
+                    ? new Font("Courier New", 16, FontStyle.Bold)
+                    : new Font("Courier New", 12, FontStyle.Bold);
+                timeLabel.ForeColor = remaining.TotalSeconds <= 10 ? Color.Red : Color.Lime;
+            };
+            countdownTimer.TimeEnded += () =>
+            {
+                MessageBox.Show("Время вышло! Попробуйте снова.", "Проигрыш");
+                Close();
+            };
+            countdownTimer.Start();
+        }
+
+        private void InitMusic()
+        {
+            musicPlayer = new BackgroundMusicPlayer();
+            musicPlayer.Play("retro_theme.wav");
+        }
+
+        private void OnTileClicked(TileView tile)
+        {
+            if (revealTimer.Enabled) return;
+
+            if (!controller.SelectCard(tile.Card)) return;
+
+            tile.Update();
+
+            if (firstTile == null)
+            {
+                firstTile = tile;
+            }
+            else if (secondTile == null && tile != firstTile)
+            {
+                secondTile = tile;
+            }
+        }
+
+        private void HandleMatchChecked(Card card1, Card card2, bool isMatch)
+        {
+            var tile1 = tileViews.FirstOrDefault(t => t.Card == card1);
+            var tile2 = tileViews.FirstOrDefault(t => t.Card == card2);
+
+            if (tile1 == null || tile2 == null)
+                return;
+
+            if (isMatch)
+            {
+                tile1.ShowMatch();
+                tile2.ShowMatch();
+                UpdateScore();
+                controller.ResetTurn();
+                ResetSelection();
+            }
+            else
+            {
+                firstTile = tile1;
+                secondTile = tile2;
+
+                revealTimer.Start();
             }
 
-            gameTimer?.Stop();
+            UpdateUI();
+        }
 
-            string message = "Вы соединили все карточки!";
+        private void UpdateUI()
+        {
+            UpdateScore();
+            UpdatePlayerLabel();
+        }
 
+        private void ResetSelection()
+        {
+            firstTile = null;
+            secondTile = null;
+        }
+
+        private void UpdateScore()
+        {
             if (isMultiplayer)
-            {
-                if (scorePlayer1 > scorePlayer2)
-                    message = $"Победа игрока 1!\nСчёт: {scorePlayer1} - {scorePlayer2}";
-                else if (scorePlayer2 > scorePlayer1)
-                    message = $"Победа игрока 2!\nСчёт: {scorePlayer1} - {scorePlayer2}";
-                else
-                    message = $"Ничья!\nСчёт: {scorePlayer1} - {scorePlayer2}";
-            }
+                scoreLabel.Text = $"Очки: {player1.Score} - {player2.Score}";
+        }
 
-            MessageBox.Show(message, "Результат");
-            backgroundMusic?.Stop();
+        private void UpdatePlayerLabel()
+        {
+            if (isMultiplayer)
+                currentPlayerLabel.Text = $"Ход игрока {game.CurrentPlayerIndex + 1}";
+        }
+
+        private void ShowGameResult(Player p1, Player p2)
+        {
+            countdownTimer?.Stop();
+            musicPlayer?.Stop();
+
+            GameResultDisplayer.Show(game, p1, p2);
             Close();
         }
     }
