@@ -11,7 +11,7 @@
 
 ### Класс: StartForm
 Назначение: начальная форма запуска игры \
-Зависимости: GameSettings, GameForm
+Зависимости: GameSettings, GameForm \
 Методы:
 - StartForm() – конструктор формы
 - button1_Click(...) – запуск игры, передача настроек в GameForm
@@ -20,7 +20,7 @@
 
 ### Класс: GameForm
 Назначение: основной UI, отображение интерфейса игры \
-Зависимости: GameSettings, Game, GameController, Player, TileView, CountdownTimer, BackgroundMusicPlayer
+Зависимости: GameSettings, Game, GameController, Player, TileView, CountdownTimer, BackgroundMusicPlayer \
 Методы:
 - GameForm(settings) – конструктор с настройками
 - InitUI() – создание визуальных элементов
@@ -32,7 +32,7 @@
 
 ### Класс: GameController
 Назначение: связывает логику (Game) и UI (GameForm) \
-Зависимости: Game, Player, Card
+Зависимости: Game, Player, Card \
 Методы:
 - GameController(game)
 - SelectCard(card) – передаёт выбор карточки в Game
@@ -43,7 +43,7 @@
 
 ### Класс: Game
 Назначение: игровая логика (состояния, игроки, правила) \
-Зависимости: Card, Player
+Зависимости: Card, Player \
 Методы:
 - Cards – список карточек
 - Players – список игроков
@@ -58,7 +58,7 @@
 
 ### Класс: GameEngine
 Назначение: генерация карточек и параметров поля \
-Зависимости: GameSettings, Card
+Зависимости: GameSettings, Card \
 Методы:
 - GameEngine(settings)
 - GenerateCards()
@@ -69,7 +69,7 @@
 
 ### Класс: GameSettings
 Назначение: хранение параметров игры \
-Свойства:
+Свойства: 
 - Difficulty – уровень сложности
 - IsMultiplayer – одиночный или многопользовательский режим
 
@@ -128,7 +128,7 @@
 
 ### Класс: GameBoardRenderer
 Назначение: отрисовка поля игры \
-Зависимости: TileView, Game
+Зависимости: TileView, Game \
 Методы:
 - Render(...)
 
@@ -136,6 +136,6 @@
 
 ### Класс: GameResultDisplayer
 Назначение: окно с финальным результатом \
-Зависимости: Game, Player
+Зависимости: Game, Player \
 Методы:
 - Show(...)
